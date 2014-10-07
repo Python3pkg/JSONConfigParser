@@ -21,7 +21,6 @@ def convert_input(msg, converter=str):
         else:
             return captured
 
-
 def list_(captured=None, secondary=None):
     '''Accepts a string delimited by commas (`,`) and returns a list.
     Optionally accepts a secondary callable to convert the list values.'''
@@ -56,3 +55,11 @@ def dict_(captured=None, secondary=None):
         captured = [secondary(k,v) for k,v in captured]
 
     return dict(captured)
+
+fieldtypes = {
+    'str'   : str,
+    'int'   : int,
+    'list'  : list_,
+    'dict'  : dict_,
+    'float' : float,
+    }

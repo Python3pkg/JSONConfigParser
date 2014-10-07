@@ -38,9 +38,12 @@ class JSONConfigParser(UserDict):
             # stating as much, for now, we'll ignore it
             pass
 
-    def view(self):
+    def view(self, field=None):
         '''A shortcut for `pprint(JSONConfigParser.data, indent=4)`'''
-        pprint(self.data, indent=4)
+        if not field:
+            pprint(self.data, indent=4)
+        else:
+            pprint(self.data[field], indent=4)
 
     def write(self, fp):
         '''Persists the current instance information to disk.'''
