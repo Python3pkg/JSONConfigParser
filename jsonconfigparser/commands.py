@@ -57,7 +57,7 @@ def edit(conf, file, field=None):
     t = fieldtypes.get(t, str)
     conf[field] = convert_input(
         converter=t,
-        msg="Please enter a value for {}: ".format(args.field)
+        msg="Please enter a value for {}: ".format(field)
         )
     conf.write(file)
 

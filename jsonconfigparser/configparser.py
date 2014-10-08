@@ -12,6 +12,10 @@ import json
 from collections import UserDict
 from pprint import pprint
 
+from jsonpath_rw import parse, Root
+
+root = str(Root())
+
 class JSONConfigParser(UserDict):
     '''Essentially a wrapper around json.load and json.dump.'''
     def __init__(self, encoder=None, decoder=None):
@@ -30,7 +34,7 @@ class JSONConfigParser(UserDict):
             with open(fp, 'a+') as fh:
                 # rewind to begining of file
                 fh.seek(0)
-                self.data = json.load(fh, cls=self.decoder)
+                self.data.update(json.load(fh, cls=self.decoder))
 
         except ValueError:
             # if the JSON file is empty
@@ -38,12 +42,17 @@ class JSONConfigParser(UserDict):
             # stating as much, for now, we'll ignore it
             pass
 
-    def view(self, field=None):
+    def view(self, path=None):
         '''A shortcut for `pprint(JSONConfigParser.data, indent=4)`'''
-        if not field:
+        if not path or path == root:
+            print("\n{}:".format(root))
             pprint(self.data, indent=4)
         else:
-            pprint(self.data[field], indent=4)
+            path = parse(path)
+            for m in path.find(self.data):
+                print("\n{!s}:".format(m.full_path))
+                pprint(m.value, indent=4)
+        print("\n",end='')
 
     def write(self, fp):
         '''Persists the current instance information to disk.'''

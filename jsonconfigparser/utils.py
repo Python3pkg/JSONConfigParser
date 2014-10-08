@@ -1,4 +1,4 @@
-from functools import partial
+from jsonpath_rw import parse
 
 def convert_input(msg, converter=str):
     '''A helper to provide typed input.
