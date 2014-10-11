@@ -1,4 +1,26 @@
+import shlex
+
+from inspect import getfullspec
+
 from jsonpath_rw import parse
+
+__registry = {}
+
+def command(f):
+    '''Stores a function and the names of its arguments in a registry global.
+    Returns the function unchanged to the namespace.
+    '''
+    __registry[f.__name__] = tuple([f, *getfullargspec(f).args])
+    return f
+
+def call(fname, json, source):
+    '''Looks up a function by its name in the registry global and
+    extracts the correct agruments from a source (such as an argparse result)
+    and calls the function with the json and other arguments.
+    '''
+    f, **kwargs = _registry.get(fname)
+    kwargs = {n:getattr(source, n) for n in kwargs if n != 'json'}
+    f(json=json, **kwargs)
 
 def convert_input(msg, converter=str):
     '''A helper to provide typed input.
@@ -22,13 +44,13 @@ def convert_input(msg, converter=str):
             return captured
 
 def list_(captured=None, secondary=None):
-    '''Accepts a string delimited by commas (`,`) and returns a list.
+    '''Accepts a space separated string and returns a list of values.
     Optionally accepts a secondary callable to convert the list values.'''
 
     if not captured:
         return partial(list_, secondary=secondary)
 
-    captured = [str.strip(v) for v in captured.split(',')]
+    captured = shlex.split(captured)
 
     if secondary:
         captured = [secondary(v) for v in captured]
@@ -37,8 +59,12 @@ def list_(captured=None, secondary=None):
 
 
 def dict_(captured=None, secondary=None):
-    '''Accepts a string delimited by commas (`,`). Which are then split
-    again by colons (`:`).
+    '''Accepts a space delimited string and breaks them into k=v pairs.
+
+        ```
+        dict_(":q
+
+        ```
 
     Optionally accepts a secondary callable for converting either
     the key or the value. The callable must accept and return both.
@@ -49,8 +75,8 @@ def dict_(captured=None, secondary=None):
     if not captured:
         return partial(dict_, secondary=secondary)
 
-    captured = [str.strip(p) for p in captured.split(',')]
-    captured = [p.split(':') for p in captured]
+    captured = 
+
     if secondary:
         captured = [secondary(k,v) for k,v in captured]
 
