@@ -4,10 +4,7 @@ import argparse
 
 from collections import namedtuple
 
-from jsonconfigparser import (
-    JSONConfigParser, view, add_file, 
-    add_field, delete, edit
-    )
+from jsonconfigparser import JSONConfigParser, call
 
 parser = argparse.ArgumentParser()
 
@@ -20,35 +17,35 @@ parser.add_argument("command", help="Action to take on the config file")
 
 # optional arguments
 parser.add_argument(
-    "-f",
-    "--field", 
+    "-p",
+    "--path", 
     help="Specific field to act on. If not passed, act on the whole file.",
     default=None
     )
 
-# run the parser and collect the arguments
-args = parser.parse_args()
+parser.add_argument(
+    "-o",
+    "--other",
+    help="Used with the addfile command to read in another file.",
+    default=""
+    )
 
-# open up our json config file and read it.
-conf = JSONConfigParser(storage=args.file, source=args.file)
+parser.add_argument(
+    "-v",
+    "--value",
+    help="Used with several commands that require a value.",
+    default=""
+    )
 
-# stuff actions into a dictionary for easy use
-Command = namedtuple('Command', ['func', 'args'])
-
-commands = {
-    "view" : Command(view, [conf, args.field]),
-    "addfile" : Command(add_file, [conf, args.file]),
-    "addfield" : Command(add_field, [conf, args.file]),
-    "delete" : Command(delete, [conf, args.file, args.field]),
-    "edit" : Command(edit, [conf, args.file, args.field])
-    }
+parser.add_argument(
+    "-m",
+    "--multi",
+    help="Boolean flag for the append command for handling multiple results along the path. Defaults to false.",
+    action="store_true"
+    )
 
 if __name__ == "__main__":
-    command = commands.get(
-        args.command, 
-        Command(
-            lambda: print("Invalid Command."), 
-            []
-            )
-        )
-    command.func(*command.args)
+    args = parser.parse_args()
+    conf = JSONConfigParser(source=args.file, storage=args.file)
+    call(args.command, conf, args)
+    conf.write()
