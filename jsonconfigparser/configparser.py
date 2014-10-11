@@ -12,9 +12,9 @@ import json
 from collections import UserDict
 from pprint import pprint
 
-from jsonpath_rw import parse, Root
+from jsonpath_rw import parse
 
-root = str(Root())
+from .utils import root
 
 class JSONConfigParser(UserDict):
     '''Essentially a wrapper around json.load and json.dump.'''
@@ -46,12 +46,16 @@ class JSONConfigParser(UserDict):
             # stating as much, for now, we'll ignore it
             pass
 
-    def view(self, endpoint=None):
+    def view(self, path=root):
         '''Pretty prints an endpoint in the JSON.
         '''
-        if not endpoint:
-            pprint(self.data, indent=4)
-        pprint(endpoint, indent=4)
+        expr = parse(path)
+        matches = expr.find(self.data)
+
+        print('\n')
+        for m in matches:
+            print("{}:".format(m.full_path))
+            pprint(m.value, indent=4) 
 
     def write(self):
         '''Persists the current instance information to disk.'''
