@@ -1,63 +1,82 @@
-from . import convert_input, list_, dict_, fieldtypes
+from collections import MutableMapping, MutableSequence
+from functools import partial
+from operator import delitem, setitem
 
-def view(conf, field):
-    conf.view(field)
+from jsonpath_rw import parse, Root
 
-def add_file(conf, existing):
-    file = input("Please enter an additional config file to concat: ")
-    conf.read(file)
-    conf.write(existing)
+from . import list_, dict_, fieldtypes
+from .utils import command, act_on_path, root, set_on_path
 
-def add_field(conf, file):
-    name, field = convert_input(
-        converter=list_,
-        msg='Please enter a name and type of field: '
+@command
+def view(json, path):
+    '''A stored command for the view method of the JSONConfigParser
+    object.
+    '''
+
+    print('\n{}:'.format(path))
+    act_on_path(
+        json.data,
+        path,
+        # the view method only accepts
+        # an endpoint to pprint and aop
+        # attempts to pass the walked JSON path
+        # and the final endpoint to the callable
+        lambda j,p: json.view(j)
         )
-    
-    field = fieldtypes.get(field, str)
+    print('\n')
 
-    captured = convert_input(
-        converter=field,
-        msg="Please enter a value for {}".format(name)
-        )
+@command
+def add_file(json, file):
+    '''Updates the JSONConfigParser object with another JSON file.
+    '''
+    json.read(file)
 
-    conf[name] = captured
-    conf.write(file)
+@command
+def add_field(json, path, value):
+    '''Adds another field to the JSONConfigParser object.
+    '''
+    set_on_path(json.data, path, value)
 
-def delete(conf, file, field=None):
-    if field is None:
-        msg = 'Are you sure you want to erase the whole config file?'
+@command
+def append(json, path, value, multi=False):
+    expr = parse(path)
+    matches = expr.find(json.data)
+
+    if not all(isinstance(m.value, (MutableMapping, MutableSequence)) for m \
+        in matches):
+            raise TypeError("Expected mutable container at endpoint for {}."
+                "".format(path))
+
+    if len(matches) > 1 and not multi:
+        raise AttributeError("Multiple paths found for {}. Please specify the "
+        "multi flag if this is intended.".format(path))
+
+    def guess_action(container):
+        '''Guess if we're dealing with a dict/object endpoint
+        or a list/array endpoint.
+
+        Returns the appropriate converter and action callable for act_on_path
+        '''
+        if isinstance(container, MutableMapping):
+            return lambda j,f,v: json[f].update(dict_(v))
+        return lambda j,f,v: json[f].extend(list_(v))
+
+    for match in matches:
+        action = guess_action(match.value)
+        action = partial(action, v=value)
+        act_on_path(json, path, action)
+
+@command
+def delete(json, path=None):
+    '''Deletes a JSONPath endpoint from the JSONConfigParser object.
+    '''
+    if not path or path == '$':
+        json.data = {}
     else:
-        msg = "Are you sure you want to erase the {} field?".format(field)
+        act_on_path(json.data, path, delitem)
 
-    confirm = input("{} [y/n]: ".format(msg))
-
-    if confirm.lower().startswith('n'):
-        return
-    elif confirm.lower().startswith('y'):
-        if field is None:
-            conf.data = {}
-        else:
-            del conf[field]
-    else:
-        print("Invalid response.")
-        return
-
-    conf.write(file)
-
-def default():
-    print("That is an invalid action.")
-
-def edit(conf, file, field=None):
-    if not field:
-        field = input("Please enter a field name to edit: ")
-
-    t = str(type(conf[field]))
-
-    t = fieldtypes.get(t, str)
-    conf[field] = convert_input(
-        converter=t,
-        msg="Please enter a value for {}: ".format(field)
-        )
-    conf.write(file)
-
+@command
+def edit(json, path, value):
+    '''Updates the value at the JSONPath endpoint.
+    '''
+    set_on_path(json.data, path, value)
