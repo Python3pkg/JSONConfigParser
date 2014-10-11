@@ -18,10 +18,14 @@ root = str(Root())
 
 class JSONConfigParser(UserDict):
     '''Essentially a wrapper around json.load and json.dump.'''
-    def __init__(self, encoder=None, decoder=None):
+    def __init__(self, storage, source=None, encoder=None, decoder=None):
+        self.storage = storage
         self.encoder = encoder or json.JSONEncoder
         self.decoder = decoder or json.JSONDecoder
         self.data = {}
+
+        if source:
+            self.read(source)
 
     def read(self, fp):
         '''Reads a file containing JSON and loads it into the
@@ -42,19 +46,14 @@ class JSONConfigParser(UserDict):
             # stating as much, for now, we'll ignore it
             pass
 
-    def view(self, path=None):
-        '''A shortcut for `pprint(JSONConfigParser.data, indent=4)`'''
-        if not path or path == root:
-            print("\n{}:".format(root))
+    def view(self, endpoint=None):
+        '''Pretty prints an endpoint in the JSON.
+        '''
+        if not endpoint:
             pprint(self.data, indent=4)
-        else:
-            path = parse(path)
-            for m in path.find(self.data):
-                print("\n{!s}:".format(m.full_path))
-                pprint(m.value, indent=4)
-        print("\n",end='')
+        pprint(endpoint, indent=4)
 
-    def write(self, fp):
+    def write(self):
         '''Persists the current instance information to disk.'''
-        with open(fp, 'w+') as fh:
+        with open(self.storage, 'w+') as fh:
             json.dump(self.data, fh, indent=4, sort_keys=True, cls=self.encoder)
