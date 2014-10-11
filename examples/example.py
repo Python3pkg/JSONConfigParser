@@ -30,8 +30,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # open up our json config file and read it.
-conf = JSONConfigParser()
-conf.read(args.file)
+conf = JSONConfigParser(storage=args.file, source=args.file)
 
 # stuff actions into a dictionary for easy use
 Command = namedtuple('Command', ['func', 'args'])
