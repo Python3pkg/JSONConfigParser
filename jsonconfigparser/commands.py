@@ -1,8 +1,8 @@
 from collections import MutableMapping, MutableSequence
 from functools import partial
-from operator import delitem, setitem
+from operator import delitem
 
-from jsonpath_rw import parse, Root
+from jsonpath_rw import parse
 
 from . import list_, dict_, fieldtypes
 from .utils import command, act_on_path, root, set_on_path
@@ -12,35 +12,24 @@ def view(json, path):
     '''A stored command for the view method of the JSONConfigParser
     object.
     '''
-
-    print('\n{}:'.format(path))
-    act_on_path(
-        json.data,
-        path,
-        # the view method only accepts
-        # an endpoint to pprint and aop
-        # attempts to pass the walked JSON path
-        # and the final endpoint to the callable
-        lambda j,p: json.view(j)
-        )
-    print('\n')
+    json.view(path)
 
 @command
-def add_file(json, file):
+def add_file(json, other):
     '''Updates the JSONConfigParser object with another JSON file.
     '''
-    json.read(file)
+    json.read(other)
 
 @command
 def add_field(json, path, value):
     '''Adds another field to the JSONConfigParser object.
     '''
-    set_on_path(json.data, path, value)
+    set_on_path(json, path, value)
 
 @command
 def append(json, path, value, multi=False):
     expr = parse(path)
-    matches = expr.find(json.data)
+    matches = expr.find(json)
 
     if not all(isinstance(m.value, (MutableMapping, MutableSequence)) for m \
         in matches):
@@ -71,12 +60,12 @@ def delete(json, path=None):
     '''Deletes a JSONPath endpoint from the JSONConfigParser object.
     '''
     if not path or path == '$':
-        json.data = {}
+        json = {}
     else:
-        act_on_path(json.data, path, delitem)
+        act_on_path(json, path, delitem)
 
 @command
 def edit(json, path, value):
     '''Updates the value at the JSONPath endpoint.
     '''
-    set_on_path(json.data, path, value)
+    set_on_path(json, path, value)

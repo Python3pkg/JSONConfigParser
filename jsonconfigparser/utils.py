@@ -1,6 +1,8 @@
 import shlex
 
+from functools import partial
 from inspect import getfullargspec
+from operator import setitem
 
 from jsonpath_rw import parse, Root
 
@@ -72,18 +74,20 @@ def act_on_path(json, path, action):
 
     *path, final = [process(item) for item in path.split('.') if item != root]
 
+    json = json.data
+
     for item in path:
         json = json[item]
 
     return action(json, final)
 
-def set_on_path(json, path, action):
+def set_on_path(json, path, value):
     '''Sets an item at the end of a JSONpath.
     '''
     # setitem y u no kwargs?!
     action = lambda j, f, v: setitem(j, f, v)
     action = partial(action, v=value)
-    act_on_path(json.data, path, action)
+    act_on_path(json, path, action)
 
 def list_(captured=None, secondary=None):
     '''Accepts a space separated string and returns a list of values.
