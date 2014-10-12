@@ -136,6 +136,19 @@ def test_append_convert_to_int(tmpdir):
 
     assert 4 in conf['things']
 
+
+def test_append_convert_to_float(tmpdir):
+
+    test_file = tmpdir.join("test.json")
+    conf = JSONConfigParser(storage=test_file.strpath)
+
+    conf['things'] = []
+
+    commands.append(conf, "$.things", "3.14", convert='float')
+
+    assert 3.14 in conf['things']
+
+
 def test_delete(tmpdir):
     
     test_file = tmpdir.join("test.json")
