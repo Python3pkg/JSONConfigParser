@@ -100,6 +100,31 @@ def test_append_to_multiple_dict(tmpdir):
 
     assert all(n['installed'] for n in conf['packages'])
 
+
+def test_append_convert_to_list(tmpdir):
+
+    test_file = tmpdir.join("test.json")
+    conf = JSONConfigParser(storage=test_file.strpath)
+
+    conf['things'] = []
+
+    commands.append(conf, "$.things", "1 2 3", convert=True)
+
+    assert ["1", "2", "3"] in conf['things']
+
+
+def test_append_convet_to_dict(tmpdir):
+
+    test_file = tmpdir.join("test.json")
+    conf = JSONConfigParser(storage=test_file.strpath)
+
+    conf['things'] = []
+
+    commands.append(conf, "$.things", "color=purple", convert=True)
+
+    assert {"color":"purple"} in conf['things']
+
+
 def test_delete(tmpdir):
     
     test_file = tmpdir.join("test.json")

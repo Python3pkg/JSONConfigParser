@@ -20,7 +20,7 @@ parser.add_argument(
     "-p",
     "--path", 
     help="Specific field to act on. If not passed, act on the whole file.",
-    default=None
+    default="$"
     )
 
 parser.add_argument(
@@ -42,6 +42,13 @@ parser.add_argument(
     "--multi",
     help="Boolean flag for the append command for handling multiple results along the path. Defaults to false.",
     action="store_true"
+    )
+
+parser.add_argument(
+    '-c',
+    '--convert',
+    help="Optional convert flag for appending action.",
+    default=False
     )
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ def add_field(json, path, value):
     set_on_path(json, path, value)
 
 @command
-def append(json, path, value, multi=False):
+def append(json, path, value, multi=False, convert=False):
     expr = parse(path)
     matches = expr.find(json)
 
@@ -50,6 +50,12 @@ def append(json, path, value, multi=False):
         if isinstance(container, MutableMapping):
             return lambda j, f, v: j[f].update(v)
         return lambda j, f, v: j[f].append(v)
+
+    if convert:
+        if '=' in value:
+            value = dict_(value)
+        else:
+            value = list_(value)
 
     for match in matches:
         action = guess_action(match.value)
