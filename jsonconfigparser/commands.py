@@ -44,16 +44,17 @@ def append(json, path, value, multi=False):
         '''Guess if we're dealing with a dict/object endpoint
         or a list/array endpoint.
 
-        Returns the appropriate converter and action callable for act_on_path
+        Returns a callable that will either append or update depending on the
+        container type.
         '''
         if isinstance(container, MutableMapping):
-            return lambda j,f,v: json[f].update(dict_(v))
-        return lambda j,f,v: json[f].extend(list_(v))
+            return lambda j, f, v: j[f].update(v)
+        return lambda j, f, v: j[f].append(v)
 
     for match in matches:
         action = guess_action(match.value)
         action = partial(action, v=value)
-        act_on_path(json, path, action)
+        act_on_path(json, str(match.full_path), action)
 
 @command
 def delete(json, path=None):

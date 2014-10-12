@@ -31,7 +31,8 @@ def call(fname, json, source):
     '''Looks up a function by its name in the registry global and
     extracts the correct agruments from a source (such as an argparse result)
     and calls the function with the json and other arguments. The result is not
-    returned to the caller.
+    returned to the caller. call returns True if no exceptions are raised and
+    any raised exceptions are propogated to the caller.
 
 
     :param fname str: The string name of the function to be called.
@@ -47,6 +48,7 @@ def call(fname, json, source):
     f, *kwargs = __registry.get(fname)
     kwargs = {n:getattr(source, n) for n in kwargs if n != 'json'}
     f(json=json, **kwargs)
+    return True
 
 
 def act_on_path(json, path, action):
