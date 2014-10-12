@@ -56,3 +56,6 @@ target/
 # vim files
 *.swp
 *.swo
+
+# actual json files
+.json
