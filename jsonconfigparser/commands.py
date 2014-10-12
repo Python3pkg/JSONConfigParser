@@ -4,8 +4,20 @@ from operator import delitem
 
 from jsonpath_rw import parse
 
-from . import list_, dict_, fieldtypes
+from . import list_, dict_, fieldtypes, shell as sh
 from .utils import command, act_on_path, root, set_on_path
+
+@command
+def write(json, *args):
+    '''Calls the write method on the JSONConfigParser object.
+    Implemented for interactive shell use.
+    '''
+    json.write()
+
+@command
+def shell(json, *args):
+    '''Launches interactive shell prompt.'''
+    sh.run(json)
 
 @command
 def view(json, path):
@@ -21,9 +33,13 @@ def add_file(json, other):
     json.read(other)
 
 @command
-def add_field(json, path, value):
+def add_field(json, path, value, convert=False):
     '''Adds another field to the JSONConfigParser object.
     '''
+    
+    if convert in fieldtypes:
+        value = fieldtypes[convert](value)
+
     set_on_path(json, path, value)
 
 @command
@@ -69,7 +85,11 @@ def delete(json, path=None):
         act_on_path(json, path, delitem)
 
 @command
-def edit(json, path, value):
+def edit(json, path, value, convert=False):
     '''Updates the value at the JSONPath endpoint.
     '''
+    
+    if convert in fieldtypes:
+        value = fieldtypes[convert](value)
+
     set_on_path(json, path, value)
