@@ -51,11 +51,8 @@ def append(json, path, value, multi=False, convert=False):
             return lambda j, f, v: j[f].update(v)
         return lambda j, f, v: j[f].append(v)
 
-    if convert:
-        if '=' in value:
-            value = dict_(value)
-        else:
-            value = list_(value)
+    if convert in fieldtypes:
+        value = fieldtypes[convert](value)
 
     for match in matches:
         action = guess_action(match.value)

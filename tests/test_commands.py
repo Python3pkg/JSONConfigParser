@@ -1,4 +1,4 @@
-from jsonconfigparser import commands, JSONConfigParser
+from jsonconfigparser import commands, JSONConfigParser, fieldtypes
 
 import pytest
 
@@ -108,7 +108,7 @@ def test_append_convert_to_list(tmpdir):
 
     conf['things'] = []
 
-    commands.append(conf, "$.things", "1 2 3", convert=True)
+    commands.append(conf, "$.things", "1 2 3", convert='list')
 
     assert ["1", "2", "3"] in conf['things']
 
@@ -120,10 +120,21 @@ def test_append_convet_to_dict(tmpdir):
 
     conf['things'] = []
 
-    commands.append(conf, "$.things", "color=purple", convert=True)
+    commands.append(conf, "$.things", "color=purple", convert='dict')
 
     assert {"color":"purple"} in conf['things']
 
+
+def test_append_convert_to_int(tmpdir):
+
+    test_file = tmpdir.join("test.json")
+    conf = JSONConfigParser(storage=test_file.strpath)
+
+    conf['things'] = []
+
+    commands.append(conf, "$.things", "4", convert='int')
+
+    assert 4 in conf['things']
 
 def test_delete(tmpdir):
     
