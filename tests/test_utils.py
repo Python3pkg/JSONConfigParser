@@ -76,6 +76,15 @@ def test_set_on_path(tmpdir):
     assert 'packages' in conf
     assert 'jsonconfigparser' == conf['packages'][0]
 
+
+def test_bool():
+    assert utils.bool_('True')
+    assert utils.bool_('1')
+    assert not utils.bool_('False')
+    assert not utils.bool_('FALSE')
+    assert not utils.bool_('0')
+    assert not utils.bool_('0.0')
+
 def test_list_converter():
 
     converted = utils.list_("1 2 3")
@@ -114,3 +123,25 @@ def test_dict__secondary():
     assert converted["SECOND"] == 2
 
     assert utils.dict_(secondary=action)("first=1 second=2") == converted
+
+@pytest.mark.parametrize("parts, captured, output", [
+        ('int', '4', 4),
+        ('bool', 'False', False),
+        ('str', 'Fred', 'Fred'),
+        ('float', '4', 4.0),
+        ('list', 'a b c', ['a', 'b', 'c']),
+        ('dict', 'key=value', {'key':'value'}),
+        ('int float', '4', '4'),
+        ('list int', '1 2 3', [1, 2, 3]),
+        ('dict int', 'key=1', {'key':1}),
+        ('dict list', 'key="a b c"', {'key':['a', 'b', 'c']}),
+        ('list dict', '"key=value other=some" "key=value"',
+            [{'key':'value', 'other':'some'}, {'key':'value'}]),
+        ('list dict int', '"a=0 b=1"', [{'a':0, 'b':1}]),
+        ('dict list float', 'key="1 2 3"', {'key':[1.0, 2.0, 3.0]}),
+        ('dict int list float', '1="1 2 3"', {1:[1.0, 2.0, 3.0]}),
+        ('dict int dict int list', '4="4=\'value\'"', {4: {4: ['value']}})
+        ])
+def test_build_converter(parts, captured, output):
+    print(parts, captured)
+    assert utils.build_converter(parts)(captured) == output

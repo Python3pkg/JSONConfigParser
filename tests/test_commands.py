@@ -1,4 +1,4 @@
-from jsonconfigparser import commands, JSONConfigParser, fieldtypes
+from jsonconfigparser import commands, JSONConfigParser
 
 import pytest
 
@@ -34,6 +34,18 @@ def test_add_field(tmpdir):
     assert "package" in conf
     assert conf["package"] == "jsonconfigparser"
 
+
+def test_add_field_convert(tmpdir):
+    test_file = tmpdir.join("test.json")
+    conf = JSONConfigParser(storage=test_file.strpath)
+
+    commands.add_field(conf, "$.age", "25", convert="int")
+    commands.add_field(conf, "$.friends", "louis", convert="list")
+    commands.add_field(conf, "$.ids", "12 13 14", convert="list int")
+
+    assert conf['age'] == 25
+    assert conf['friends'] == ['louis']
+    assert conf['ids'] == [12, 13, 14]
 
 def test_append_immutable_raises_error(tmpdir):
     test_file = tmpdir.join("test.json")
@@ -171,5 +183,16 @@ def test_edit(tmpdir):
     conf['testing'] = False
 
     commands.edit(conf, "$.testing", True)
+
+    assert conf['testing']
+
+def test_edit_convert(tmpdir):
+    
+    test_file = tmpdir.join("test.json")
+    conf = JSONConfigParser(storage=test_file.strpath)
+
+    conf['testing'] = False
+
+    commands.edit(conf, "$.testing", "True", convert="bool")
 
     assert conf['testing']
