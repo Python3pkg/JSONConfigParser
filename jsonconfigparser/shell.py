@@ -4,7 +4,8 @@ import sys
 
 from functools import partial
 
-from . import JSONConfigParser, call, command, root, utils
+from .configparser import JSONConfigParser
+from .utils import call, command, root, __registry
 
 __prompt = "JSON >>> "
 __sort = True
@@ -24,7 +25,7 @@ class ValueStore:
         self.convert = False
 
 def autocomplete(text, state):
-    actions = [c for c in sorted(utils.__registry.keys()) if c.startswith(text)]
+    actions = [c for c in sorted(__registry.keys()) if c.startswith(text)]
 
     if state > len(actions):
         return None
