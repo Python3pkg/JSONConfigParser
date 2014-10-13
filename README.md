@@ -1,6 +1,10 @@
 #JSONConfigParser
 A JSON config editor built on top of [jsonpath-rw.](https://github.com/kennknowles/python-jsonpath-rw/).
 
+##Installation
+
+Simple as `pip install --user jsonconfigparser`
+
 ##Use
 Right now there is an example of building a CLI utility in the examples directory.
 

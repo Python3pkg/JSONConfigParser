@@ -1,5 +1,5 @@
 import os, sys
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 class PyTest(TestCommand):
@@ -21,23 +21,18 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
-def read(fp):
-    fp = os.path.join(
-        os.path.dirname(__file__),
-        fp
-        )
-
-    with open(fp) as fh:
+def read(*paths):
+    with open(os.path.join(*paths), 'r') as fh:
         data = fh.readlines()
 
     return data
 
-requires = read("REQUIREMENTS")
+requires = read("REQUIREMENTS.txt")
 # if installed under the editable flag, this will be present
 # so we need to strip it out.
 requires = [d.strip('\n') for d in requires if "JSONConfigParser" not in d ]
 
-test_requires = [d.strip('\n') for d in read("TEST_REQUIREMENTS")]
+test_requires = [d.strip('\n') for d in read("TEST_REQUIREMENTS.txt")]
 
 if __name__ == '__main__':
 
@@ -50,12 +45,16 @@ if __name__ == '__main__':
         license="MIT",
         url="https://github.com/justanr/JSONConfigParser",
         keywords="CLI json config",
-        packages=["jsonconfigparser"],
+        packages=find_packages(exclude=["tests", "examples"]),
         classifiers=[
             'Development Status :: 3 - Alpha' ,
             'Environment :: Console',
             'Intended Audience :: Developers',
-            'License :: OSI Approved :: MIT License'
+            'License :: OSI Approved :: MIT License',
+            'Topic :: Text Processing',
+            'Programming Language :: Python :: 3.4',
+            'Operating System :: POSIX :: Linux',
+            'Natural Language :: English',
             ],
         install_requires=requires,
         tests_requires=test_requires,
@@ -65,4 +64,7 @@ if __name__ == '__main__':
                 ['jsonconf=jsonconfigparser:cli']
             },
         test_suite='tests',
+        include_package_data = True,
+        package_data = { '' : ['*.txt', '*.md']},
+        exclude_pakage_data = { '' : ['*.json']},
         )
