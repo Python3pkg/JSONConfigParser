@@ -113,7 +113,7 @@ def append(json, path, value, multi=False, convert=False):
         act_on_path(json, str(match.full_path), action)
 
 @command
-def delete(json, path=False):
+def delete(json, path=False, multi=False):
     '''Deletes a JSONPath endpoint from the JSONConfigParser object.
 
     :param json JSONConfigParser: The JSON representation to act on.
@@ -123,10 +123,22 @@ def delete(json, path=False):
     if not path or path == root:
         json = {}
     else:
-        act_on_path(json, path, delitem)
+    
+        expr = parse(path)
+        matches = expr.find(json)
+
+        if len(matches) > 1 and not multi:
+            raise AttributeError(
+            "Multiple endpoints found for {}. "
+            "Please specify the multi flag if this is intended."
+            "".format(path)
+            )
+
+        for m in matches:
+            act_on_path(json, str(m.full_path), delitem)
 
 @command
-def edit(json, path, value, convert=False):
+def edit(json, path, value, convert=False, multi=False):
     '''Updates the value at the JSONPath endpoint.
 
     :param json JSONConfigParser: The JSON representation to act on.
@@ -136,8 +148,19 @@ def edit(json, path, value, convert=False):
         it's final form.
     '''
 
+    expr = parse(path)
+    matches = expr.find(json)
+
+    if len(matches) > 1 and not multi:
+        raise AttributeError(
+            'Multiple endpoints found for {}. '
+            'Please specify the multi flag if this is intended.'
+            ''.format(str(path))
+            )
+
     if convert:
         converter = build_converter(convert)
         value = converter(value)
 
-    set_on_path(json, path, value)
+    for m in matches:
+        set_on_path(json, str(m.full_path), value)

@@ -140,8 +140,11 @@ def test_dict__secondary():
         ('list dict int', '"a=0 b=1"', [{'a':0, 'b':1}]),
         ('dict list float', 'key="1 2 3"', {'key':[1.0, 2.0, 3.0]}),
         ('dict int list float', '1="1 2 3"', {1:[1.0, 2.0, 3.0]}),
-        ('dict int dict int list', '4="4=\'value\'"', {4: {4: ['value']}})
+        ('dict int dict int list', '4=4=value', {4: {4: ['value']}}),
+        ('list dict int list float', '"1=\'1 2 3\'" "1=\'1 2 3\'"',
+            [{1:[1.0, 2.0, 3.0]}, {1: [1.0, 2.0, 3.0]}]
+            ),
         ])
 def test_build_converter(parts, captured, output):
-    print(parts, captured)
+    print(parts, captured, output)
     assert utils.build_converter(parts)(captured) == output

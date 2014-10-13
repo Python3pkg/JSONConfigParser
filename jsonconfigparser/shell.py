@@ -79,7 +79,8 @@ def run(json):
         
         try:
             interpret(line)(json=json)
-        except NotImplementedError as e:
+        except (NotImplementedError, TypeError,
+                AttributeError, ValueError) as e:
             print(e)
 
         __exit = False

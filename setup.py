@@ -23,25 +23,26 @@ class PyTest(TestCommand):
 
 def read(*paths):
     with open(os.path.join(*paths), 'r') as fh:
-        data = fh.readlines()
+        data = fh.read()
 
     return data
 
 requires = read("REQUIREMENTS.txt")
 # if installed under the editable flag, this will be present
 # so we need to strip it out.
-requires = [d.strip('\n') for d in requires if "JSONConfigParser" not in d ]
+requires = [d for d in requires.split('\n') if "JSONConfigParser" not in d ]
 
-test_requires = [d.strip('\n') for d in read("TEST_REQUIREMENTS.txt")]
+test_requires = [d for d in read("TEST_REQUIREMENTS.txt").split('\n')]
 
 if __name__ == '__main__':
 
     setup(
         name="jsonconfigparser",
-        version="0.1.0",
+        version="0.1.1",
         author="Alec Nikolas Reiter",
         author_email="alecreiter@gmail.com",
         description="Quick and easy editting of JSON files.",
+        long_description=read('README.md'),
         license="MIT",
         url="https://github.com/justanr/JSONConfigParser",
         keywords="CLI json config",

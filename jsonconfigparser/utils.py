@@ -155,13 +155,7 @@ def dict_(captured=None, secondary=None):
 
 
     captured = shlex.split(captured)
-    captured = [kv.split('=') for kv in captured]
-
-    # corner case where secondary=dict
-    # this probably just pushes the corner case down
-    # on more level through :/
-    # TODO: Definitive fix if possible
-    captured = [(k, '='.join(v)) for k, *v in captured]
+    captured = [kv.split('=', maxsplit=1) for kv in captured]
 
     if secondary:
         captured = [secondary(k,v) for k,v in captured]
