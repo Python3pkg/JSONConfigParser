@@ -6,22 +6,22 @@ Right now there is an example of building a CLI utility in the examples director
 
 It can also be used programmatically as well by importing the `JSONConfigParser` class and the commands modules.
 
-###Example CLI App
+###CLI App
 
 This is built with argparse. Using it is as simple as:
 
-    ./example conf.json view -p $
+    jsonconf path/to/conf.json view -p $
 
 That command will view the entire JSON file. Other actions include:
 
 | command  | description                                                                                                                           |                                                                                                                                                                                                                                |
 |----------|---------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| addfile  | Concatenates a second JSON file onto the current. Warning: This will overwrite any shared keys.                                       | `./example.py conf.json addfile -o path/to/other.json`                                                                                                                                                                         |
-| addfield | Adds a key and value to a specified JSONPath                                                                                          | `./example.py conf.json addfield -p $.name -v jsonconfigparser`                                                                                                                                                                |
-| append   | Appends a value to the specified JSONPath. Optionally, converts the field to another type. Optionally, apply to every found endpoint. | `./example.py conf.json append -p $.things.[0] -v "Star bellied sneeches"`  `./example.py conf.json append -p $.products.hats -v "23.44" -t float`  `./example.py conf.json append -p $.products.[*].descript -v "A thing" -m` |
-| delete   | Deletes an item from the specific JSONPath.                                                                                           | `./example.py conf.json delete $.products.hats`                                                                                                                                                                                |
-| edit     | Reset the value at the endpoint of the JSONPath                                                                                       | `./example.py conf.json edit -p $.products.hats.descript -v "A really cool hat."`                                                                                                                                              |
-
+| addfile  | Concatenates a second JSON file onto the current. Warning: This will overwrite any shared keys.                                       | `jsonconf conf.json addfile -o path/to/other.json`                                                                                                                                                                         |
+| addfield | Adds a key and value to a specified JSONPath                                                                                          | `jsonconf conf.json addfield -p $.name -v jsonconfigparser`                                                                                                                                                                |
+| append   | Appends a value to the specified JSONPath. Optionally, converts the field to another type. Optionally, apply to every found endpoint. | `jsonconf conf.json append -p $.things.[0] -v "Star bellied sneeches"`  `jsonconf conf.json append -p $.products.hats -v "23.44" -t float`  `jsonconf conf.json append -p $.products.[*].descript -v "A thing" -m` |
+| delete   | Deletes an item from the specific JSONPath.                                                                                           | `jsonconf conf.json delete $.products.hats`                                                                                                                                                                                |
+| edit     | Reset the value at the endpoint of the JSONPath                                                                                       | `jsonconf conf.json edit -p $.products.hats.descript -v "A really cool hat."`                                                                                                                                              |
+| shell    | Drop into the interactive prompt.                                                                                                     | `jsonconf conf.json shell`   |
 
 Arguments:
 
@@ -33,14 +33,19 @@ Arguments:
 | -m/--multi   | The multi boolean flag. Currently only used with append action. Defaults to false, if True append will add the value to every path found                  |
 | -c/--convert | The conversion flag. Currently only used with append. Defaults to False. If passed, a value must be provided of `int`, `float`, `list`, `dict`, or `str`. |
 
+###Interactive Shell Prompt
+
+This is built with readlines. To enter it, simply run `jsonconf path/to/conf.json shell`
+
+Executing commands is exactly the same as on the command line, except the shell can't be reinstantiated inside itself.
+
+To exit, two consecutive keyboard interrupts are needed. If a command is run between them, then the exit flag is reset.
+
+There is also an extra method available in the shell `write` which saves the current state of the file.
 
 ##Todo:
 There are several things that I want to do, small and big:
 
-* Apply the conversion and multi flags to edit and delete as well.
-* Construct an interactive prompt (probably using some combo of readlines and curses)
+* Apply the multiflag where needed.
 * Clean up the whole package up and turn what I can into classes/objects.
-
-##NOTE: 
-There is an issue with installing `jsonpath-rw` within setuptools. 
-Currently, running `pip install -r REQUIREMENTS` is the best option after running `pip install --editable .`
+* Ability to write to a different file for CLI and Shell.
