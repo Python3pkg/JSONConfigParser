@@ -29,13 +29,13 @@ That command will view the entire JSON file. Other actions include:
 
 Arguments:
 
-| flags        | description                                                                                                                                               |
-|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| -p/--path    | The path flag the only acceptable value is a JSONPath string                                                                                              |
-| -o/--other   | The other file flag, used with addfile to concatenate files together                                                                                      |
-| -v/--value   | The value flag, used with any action that requires a value                                                                                                |
-| -m/--multi   | The multi boolean flag. Currently only used with append action. Defaults to false, if True append will add the value to every path found                  |
-| -c/--convert | The conversion flag. Currently only used with append. Defaults to False. If passed, a value must be provided of `int`, `float`, `list`, `dict`, or `str`. |
+| flags        | description                                                                                                                                                                              |
+|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -p/--path    | The path flag the only acceptable value is a JSONPath string                                                                                                                             |
+| -o/--other   | The other file flag, used with addfile to concatenate files together                                                                                                                     |
+| -v/--value   | The value flag, used with any action that requires a value                                                                                                                               |
+| -m/--multi   | The multi boolean flag. Currently only used with append action. Defaults to false, if True append will add the value to every path found                                                 |
+| -c/--convert | The conversion flag. Currently only used with append. Defaults to False. If passed, a value must be provided of `int`, `float`, `list`, `dict`, 'bool`,`str` or some combination of them |
 
 ###Interactive Shell Prompt
 
