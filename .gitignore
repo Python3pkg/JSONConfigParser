@@ -58,4 +58,4 @@ target/
 *.swo
 
 # actual json files
-.json
+*.json
