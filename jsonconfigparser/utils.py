@@ -1,3 +1,12 @@
+'''
+
+    Utilities for JSONConfigParser
+
+    :copyright 2014: Alec Nikolas Reiter, contributors
+    :license MIT: See LICENSE for more details
+
+'''
+
 import shlex
 
 from functools import partial
@@ -26,15 +35,10 @@ def command(f):
     # 'add_field' becomes 'addfield'
     name = f.__name__.replace('_', '')
 
-    info = [f]
-
-    # strip the json argument from commands as call explicitly passes it
-    info.extend([a for a in getfullargspec(f).args if a != 'json'])
-
-    __registry[name] = tuple(info)
+    __registry[name] = f
     return f
 
-def call(fname, json, source):
+def call(fname, json, **source):
     '''Looks up a function by its name in the registry global and
     extracts the correct agruments from a source (such as an argparse result)
     and calls the function with the json and other arguments. The result is not
@@ -53,9 +57,8 @@ def call(fname, json, source):
     :returns True:
     '''
 
-    f, *kwargs = __registry.get(fname)
-    kwargs = {n:getattr(source, n) for n in kwargs}
-    f(json=json, **kwargs)
+    f = __registry.get(fname)
+    f(json=json, **source)
     return True
 
 

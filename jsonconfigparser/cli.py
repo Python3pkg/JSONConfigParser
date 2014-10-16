@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
-import argparse
+'''
+    Command line interface for JSONConfigParser.
 
-from collections import namedtuple
+    :copyright: Alec Nikolas Reiter, contributors
+    :license MIT: See ..LICENSE for details
+'''
+
+
+import argparse
 
 from .configparser import JSONConfigParser
 from .utils import call
@@ -11,7 +17,7 @@ parser = argparse.ArgumentParser()
 
 # positional arguments
 parser.add_argument(
-    "file", 
+    "file",
     help="Path to config file, may be relative or absolute."
     )
 parser.add_argument("command", help="Action to take on the config file")
@@ -19,7 +25,7 @@ parser.add_argument("command", help="Action to take on the config file")
 # optional arguments
 parser.add_argument(
     "-p",
-    "--path", 
+    "--path",
     help="Specific field to act on. If not passed, act on the whole file.",
     default="$"
     )
@@ -41,7 +47,8 @@ parser.add_argument(
 parser.add_argument(
     "-m",
     "--multi",
-    help="Boolean flag for the append command for handling multiple results along the path. Defaults to false.",
+    help="Boolean flag for the append command for handling multiple results "
+    "along the path. Defaults to false.",
     action="store_true"
     )
 
@@ -54,10 +61,18 @@ parser.add_argument(
 
 
 def cli():
+    ''' Entry point for CLI functionality. This is what is run when `jsonconf`
+    is called on the command line.
+    '''
+
+
+    fields = ('path', 'other', 'value', 'multi', 'convert')
+
     args = parser.parse_args()
+    kwargs = {f:getattr(args, f) for f in fields}
     conf = JSONConfigParser(source=args.file, storage=args.file)
-    call(args.command, conf, args)
-    conf.write()   
+    call(args.command, conf, **kwargs)
+    conf.write()
 
 if __name__ == "__main__":
     cli()
