@@ -9,6 +9,7 @@
 
 import shlex
 
+from collections import MutableMapping, MutableSequence
 from functools import partial
 from inspect import getfullargspec
 from operator import setitem
@@ -37,6 +38,7 @@ def command(f):
 
     __registry[name] = f
     return f
+
 
 def call(fname, json, **source):
     '''Looks up a function by its name in the registry global and
@@ -79,15 +81,6 @@ def act_on_path(json, path, action):
     if path == root:
         return action(json, path)
 
-    def process(item):
-        # JSONpath indicies are denoted by [integer]
-        # to be converted to a Python integer the brackets
-        # must stripped out
-        if '[' in item:
-            item = item.replace('[', '').replace(']', '')
-            item = int(item)
-        return item
-
     *path, final = [process(item) for item in path.split('.') if item != root]
 
     json = json.data
@@ -96,6 +89,7 @@ def act_on_path(json, path, action):
         json = json[item]
 
     return action(json, final)
+
 
 def set_on_path(json, path, value):
     '''Sets an item at the end of a JSONpath.
@@ -109,6 +103,37 @@ def set_on_path(json, path, value):
     action = lambda j, f, v: setitem(j, f, v)
     action = partial(action, v=value)
     act_on_path(json, path, action)
+
+
+def process(item):
+    '''Processes an item in a JSONpath to decide if it's an index or not.
+    If the item is determined to be an index (by the syntax [int]) it is
+    converted to a Python integer, otherwise it's simply passed through.
+
+    :param item str: JSONpath piece to be processed.
+    :returns item: This is either the original string or an integer, depending
+        on if it was converted or not.
+    '''
+    # JSONpath indicies are denoted by [integer]
+    # to be converted to a Python integer the brackets
+    # must stripped out
+    if '[' in item:
+        item = item.replace('[', '').replace(']', '')
+        item = int(item)
+    return item
+
+
+def guess_action(container):
+    '''Guess if we're dealing with a dict/object endpoint
+    or a list/array endpoint.
+
+    Returns a callable that will either append or update depending on the
+    container type.
+    '''
+    if isinstance(container, MutableMapping):
+        return lambda j, f, v: setitem(j, f, v)
+    return lambda j, f, v: j[f].append(v)
+
 
 def list_(captured=None, secondary=None):
     '''Accepts a space separated string and returns a list of values.
@@ -171,6 +196,7 @@ def dict_(captured=None, secondary=None):
 
     return dict(captured)
 
+
 def bool_(captured):
     '''Simply converts a string to a boolean.
 
@@ -182,6 +208,7 @@ def bool_(captured):
     if any(f == captured for f in ['false', '0', '0.0']):
         return False
     return True
+
 
 def build_converter(parts):
     '''Accepts a space delimited string and attempts to build a converter
@@ -294,7 +321,7 @@ def build_converter(parts):
 
         elif parts[0] == 'dict':
 
-            if len(parts[1:]) == 1 or any(ns == parts[1] for ns in nonscalar):
+            if len(parts[1:]) == 1 or parts[1] in nonscalar:
                 # If there is only one more part -OR- the next part is
                 # a list or dictionary, we'll only build a converter
                 # for the values of this dictionary
@@ -327,6 +354,7 @@ def build_converter(parts):
             #
             # ex: build_converter('int float')
             return fieldtypes['str']
+
 
 # dictionary of callables that return JSON compliant types
 fieldtypes = {

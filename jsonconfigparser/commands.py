@@ -15,7 +15,7 @@ from jsonpath_rw import parse
 
 from .utils import (
     build_converter, command, act_on_path, 
-    root, set_on_path, root
+    root, set_on_path, root, guess_action
     )
 
 from . import shell as sh
@@ -28,10 +28,12 @@ def write(json, *args, **kwargs):
     '''
     json.write()
 
+
 @command
 def shell(json, *args, **kwargs):
     '''Launches interactive shell prompt.'''
     sh.run(json)
+
 
 @command
 def view(json, path, **kwargs):
@@ -44,6 +46,7 @@ def view(json, path, **kwargs):
     '''
     json.view(path)
 
+
 @command
 def add_file(json, other, **kwargs):
     '''Updates the JSONConfigParser object with another JSON file.
@@ -54,7 +57,9 @@ def add_file(json, other, **kwargs):
     '''
     json.read(other)
 
+
 @command
+
 def add_field(json, path, value, convert=False, **kwargs):
     '''Adds another field to the JSONConfigParser object.
 
@@ -72,6 +77,7 @@ def add_field(json, path, value, convert=False, **kwargs):
         value = converter(value)
 
     set_on_path(json, path, value)
+
 
 @command
 def append(json, path, value, multi=False, convert=False, **kwargs):
@@ -101,17 +107,6 @@ def append(json, path, value, multi=False, convert=False, **kwargs):
         raise AttributeError("Multiple paths found for {}. Please specify the "
         "multi flag if this is intended.".format(str(path)))
 
-    def guess_action(container):
-        '''Guess if we're dealing with a dict/object endpoint
-        or a list/array endpoint.
-
-        Returns a callable that will either append or update depending on the
-        container type.
-        '''
-        if isinstance(container, MutableMapping):
-            return lambda j, f, v: j.update({f:v})
-        return lambda j, f, v: j[f].append(v)
-
     if convert:
         converter = build_converter(convert)
         value = converter(value)
@@ -120,6 +115,7 @@ def append(json, path, value, multi=False, convert=False, **kwargs):
         action = guess_action(match.value)
         action = partial(action, v=value)
         act_on_path(json, str(match.full_path), action)
+
 
 @command
 def delete(json, path=False, multi=False, **kwargs):
@@ -144,6 +140,7 @@ def delete(json, path=False, multi=False, **kwargs):
 
         for m in matches:
             act_on_path(json, str(m.full_path), delitem)
+
 
 @command
 def edit(json, path, value, convert=False, multi=False, **kwargs):

@@ -8,8 +8,7 @@ def test_command_deco():
         pass
 
     assert "underscoredfunc" in utils.__registry
-    assert underscored_func in utils.__registry["underscoredfunc"]
-    assert "arg" in utils.__registry['underscoredfunc']
+    assert underscored_func == utils.__registry["underscoredfunc"]
 
 def test_call():
 
@@ -17,13 +16,9 @@ def test_call():
     def test_func(json, this, other):
         pass
 
-    # generic data store
-    # look into mocking solution for this
-    store = lambda: None
-    store.this = None
-    store.other = None
+    store = {'this':None, 'other':None}
 
-    assert utils.call("testfunc", {}, store)
+    assert utils.call("testfunc", {}, **store)
 
 def test_call_propagates():
 
@@ -31,14 +26,10 @@ def test_call_propagates():
     def test_func(json, this, other):
         raise TypeError(True)
 
-    # generic data store
-    # look into mocking solution for this
-    store = lambda: None
-    store.this = None
-    store.other = None
+    store = {'this':None, 'other':None}
 
     with pytest.raises(TypeError) as excinfo:
-        utils.call('testfunc', {}, store)
+        utils.call('testfunc', {}, **store)
 
     assert excinfo.value
 
@@ -140,7 +131,7 @@ def test_dict__secondary():
         ('list dict int', '"a=0 b=1"', [{'a':0, 'b':1}]),
         ('dict list float', 'key="1 2 3"', {'key':[1.0, 2.0, 3.0]}),
         ('dict int list float', '1="1 2 3"', {1:[1.0, 2.0, 3.0]}),
-        ('dict int dict int list', '4="4=\'value\'"', {4: {4: ['value']}})
+        ('dict int dict int list', '4=4=value', {4: {4: ['value']}})
         ])
 def test_build_converter(parts, captured, output):
     print(parts, captured)

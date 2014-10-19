@@ -65,13 +65,13 @@ def cli():
     is called on the command line.
     '''
 
-
-    fields = ('path', 'other', 'value', 'multi', 'convert')
-
     args = parser.parse_args()
-    kwargs = {f:getattr(args, f) for f in fields}
-    conf = JSONConfigParser(source=args.file, storage=args.file)
-    call(args.command, conf, **kwargs)
+    kwargs = vars(args)
+    source = kwargs.pop('file')
+    command = kwargs.pop('command')
+
+    conf = JSONConfigParser(source=source, storage=source)
+    call(command, conf, **kwargs)
     conf.write()
 
 if __name__ == "__main__":
