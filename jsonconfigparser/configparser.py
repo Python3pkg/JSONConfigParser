@@ -54,7 +54,7 @@ class JSONConfigParser(UserDict):
 
         print('\n')
         for m in matches:
-            print("{}:".format(m.full_path))
+            print(("{}:".format(m.full_path)))
             pprint(m.value, indent=4) 
 
     def write(self):
